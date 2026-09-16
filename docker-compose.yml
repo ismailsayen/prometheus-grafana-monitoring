@@ -1,0 +1,109 @@
+services:
+    api-gateway:
+      build: ./api-gateway-app/
+      container_name: api-gateway
+      depends_on:
+        rabbit-queue:
+            condition: service_healthy
+      restart: always
+      env_file:
+        - .env
+      ports:
+      - "3000:3000"
+      networks:
+        - gateway
+      volumes:
+        - api-gateway_data:/var/lib/api-gateway
+    billing-app:
+      build: ./billing-app/
+      container_name: billing-app
+      depends_on:
+        billing-db:
+          condition: service_healthy
+        rabbit-queue:
+          condition: service_healthy
+      restart: always
+      env_file:
+        - .env
+      networks:
+      - billing
+      - gateway
+      
+    billing-db:
+      image: helouazizi2001/billing-database
+      container_name: billing-db
+      restart: always
+      environment:
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: billing_db
+      volumes:
+        - billing_data:/var/lib/postgresql/data
+      networks:
+        - billing
+      healthcheck:
+        test: ["CMD", "pg_isready","-U","postgres"]
+        interval: 1m
+        timeout: 30s
+        retries: 5
+        start_period: 30s
+
+    inventory-app:
+      build: ./inventory-app/
+      container_name: inventory-app
+      depends_on:
+        inventory-db:
+          condition: service_healthy
+      restart: always
+      env_file:
+        - .env
+      networks:
+      - inventory
+      - gateway
+
+    inventory-db:
+      image: helouazizi2001/inventory-database
+      container_name: inventory-db
+      restart: always
+      environment:
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: movies_db
+      healthcheck:
+        test: ["CMD", "pg_isready","-U","postgres"]
+        interval: 1m
+        timeout: 30s
+        retries: 5
+        start_period: 30s
+      volumes:
+        - inventory_data:/var/lib/postgresql/data
+      networks:
+        - inventory
+
+    rabbit-queue:
+      image: isayen/rabbit-queue:v1.1
+      container_name: rabbitmq
+      restart: always
+      env_file:
+        - .env
+      ports:
+        - "15672:15672"
+      networks:
+        - gateway
+      healthcheck:
+        test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+        interval: 30s
+        timeout: 30s
+        retries: 5
+        start_period: 30s
+    
+
+volumes:
+  inventory_data:
+  billing_data:
+  api-gateway_data:
+  
+networks:
+  gateway:
+  billing:
+  inventory:
