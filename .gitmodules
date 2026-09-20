@@ -1,0 +1,9 @@
+[submodule "inventory-app"]
+	path = inventory-app
+	url = https://github.com/ismailsayen/inventory-app.git
+[submodule "billing-app"]
+	path = billing-app
+	url = https://github.com/ismailsayen/billing-app.git
+[submodule "api-gateway-app"]
+	path = api-gateway-app
+	url = https://github.com/ismailsayen/api-gateway-app.git
