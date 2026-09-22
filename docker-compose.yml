@@ -94,6 +94,8 @@ services:
       ports:
         - "15672:15672"
         - "15692:15692"
+      volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
       networks:
         - gateway
         - monitoring-net
@@ -111,14 +113,18 @@ services:
         - "9090:9090"
       volumes:
         - ./prometheus.yml:/etc/prometheus/prometheus.yml
+        - prometheus_data:/prometheus
       networks:
         - monitoring-net
     grafana:
       image: grafana/grafana:latest
       container_name: grafana
+      user: "${UID}:${GID}"
       ports:
         - "3001:3000"
       restart: unless-stopped
+      volumes:
+      - ./data/grafana:/var/lib/grafana
       environment:
         - GF_SECURITY_ADMIN_USER=admin
         - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -129,6 +135,8 @@ volumes:
   inventory_data:
   billing_data:
   api-gateway_data:
+  rabbitmq_data:
+  prometheus_data:
   
 networks:
   gateway:
