@@ -12,6 +12,7 @@ services:
       - "3000:3000"
       networks:
         - gateway
+        - monitoring-net
       volumes:
         - api-gateway_data:/var/lib/api-gateway
     billing-app:

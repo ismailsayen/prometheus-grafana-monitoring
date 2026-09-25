@@ -6,7 +6,7 @@ scrape_configs:
     static_configs:
       - targets: ['billing-app:8080']
       
-  - job_name: 'rabbit-queue'
+  - job_name: 'api-gateway'
     static_configs:
-      - targets: ['rabbit-queue:15692']
+      - targets: ['api-gateway:3000']
         
